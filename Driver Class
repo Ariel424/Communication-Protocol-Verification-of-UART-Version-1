@@ -1,0 +1,154 @@
+class driver;
+  
+  virtual uart_if vif; // declare virtual interface 
+  
+  transaction tr;
+  
+  mailbox #(transaction) mbx; // A mailbox to exchange transaction objects between the generator and the driver.
+  
+  mailbox #(bit [7:0]) mbxds; // A mailbox to exchange 8-bit data between the driver and the testbench.
+  
+  event drvnext; // event to synchronize the execution of the driver task.
+  
+  bit [7:0] din;
+  
+  bit wr = 0;  ///random operation read / write
+  bit [7:0] datarx;  ///data rcvd during read
+  
+  function new(mailbox #(bit [7:0]) mbxds, mailbox #(transaction) mbx);
+    this.mbx = mbx;
+    this.mbxds = mbxds;
+   endfunction
+
+  task reset();
+    vif.rst <= 1'b1;
+    vif.dintx <= 0;
+    vif.send <= 0;
+    vif.rx <= 1'b1;
+    vif.doutrx <= 0;
+    vif.tx <= 1'b1;
+    vif.donerx <= 0;
+    vif.donetx <= 0;
+    repeat(5) @(posedge vif.uclktx);
+    vif.rst <= 1'b0;
+    @(posedge vif.uclktx);
+    $display("[DRV] : RESET DONE");
+  endtask
+  
+  task run();
+  
+    forever begin
+      mbx.get(tr);
+      
+      if(tr.oper == 2'b00)  ////data transmission
+          begin
+          //           
+            @(posedge vif.uclktx);
+            vif.rst <= 1'b0;
+            vif.send <= 1'b1;  ///start data sending op
+            vif.rx <= 1'b1;
+            vif.dintx = tr.dintx;
+            @(posedge vif.uclktx);
+            vif.send <= 1'b0;
+              ////wait for completion 
+            //repeat(9) @(posedge vif.uclktx);
+            mbxds.put(tr.dintx);
+            $display("[DRV]: Data Sent : %0d", tr.dintx);
+             wait(vif.donetx == 1'b1);  
+             ->drvnext;  
+          end
+      
+      else if (tr.oper == 2'b01)
+               begin
+                 
+                 @(posedge vif.uclkrx);
+                  vif.rst <= 1'b0;
+                  vif.rx <= 1'b0;
+                  vif.send <= 1'b0;
+                  @(posedge vif.uclkrx);
+                  
+                 for(int i=0; i<=7; i++) 
+                 begin   
+                      @(posedge vif.uclkrx);                
+                      vif.rx <= $urandom;
+                      datarx[i] = vif.rx;                                      
+                 end 
+                  
+                mbxds.put(datarx);
+                
+                $display("[DRV]: Data RCVD : %0d", datarx); 
+                wait(vif.donerx == 1'b1);
+                 vif.rx <= 1'b1;
+				->drvnext;
+          
+             end         
+
+    end
+    
+  endtask
+  
+endclass
+ 
+/*
+ 
+module tb;
+  generator gen;
+  driver drv;
+  event next;
+  event done;
+  mailbox #(transaction) mbx;
+  mailbox #(bit [7:0]) mbxt;
+  
+  uart_if vif();
+  
+  uart_top #(1000000, 9600) dut (vif.clk,vif.rst,vif.rx,vif.dintx,vif.send,vif.tx,vif.doutrx,vif.donetx, vif.donerx);
+  
+  
+  
+    initial begin
+      vif.clk <= 0;
+    end
+    
+    always #10 vif.clk <= ~vif.clk;
+  
+  
+ 
+  initial begin
+    mbx = new();
+    mbxt = new();
+    gen = new(mbx);
+    drv = new(mbxt,mbx);
+    gen.count  = 20;
+    drv.vif = vif;
+    
+    gen.drvnext = next;
+    
+    drv.drvnext = next;
+  end
+  
+  initial begin
+    
+    fork 
+      gen.run(); 
+      drv.run();
+    join_none
+    wait(gen.done.triggered);
+    $finish();
+  end
+  
+  initial begin
+  $dumpfile("dump.vcd");
+    $dumpvars;
+  end
+  
+  
+     
+assign vif.uclktx = dut.utx.uclk;
+assign vif.uclkrx = dut.rtx.uclk;
+    
+  
+  
+endmodule
+ 
+*/
+ 
