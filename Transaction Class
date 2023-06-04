@@ -1,15 +1,14 @@
 class transaction;
   
- typedef enum bit [1:0] {write = 2'b00 , read = 2'b01} oper_type;
+ typedef enum bit [1:0] {write = 2'b00 , read = 2'b01} oper_type; // define an enumerated type. in this case, I define "bit".
   
-  randc oper_type oper;
+  randc oper_type oper; // open is the variable that suction the randomization mechanism.
   
-  bit rx;
+  rand bit [7:0] dintx
   
-  rand bit [7:0] dintx;
-  
-  bit send;
-  bit tx;
+  bit rx; // Non-random Variable
+  bit send; // Non-random Variable
+  bit tx; // Non-random Variable
   
   bit [7:0] doutrx;
   bit donetx;
