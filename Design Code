@@ -1,9 +1,9 @@
 `timescale 1ns / 1ps
  
-module uart_top // define the module. 
+module uart_top // define the main module
 #(
-parameter clk_freq = 1000000,
-parameter baud_rate = 9600
+parameter clk_freq = 1000000 // define freq
+parameter baud_rate = 9600 // define Bandwide
 )
 (
   input clk,rst, 
@@ -16,21 +16,19 @@ parameter baud_rate = 9600
   output donerx
     );
     
-uarttx 
+uarttx // define sub module 
 #(clk_freq, baud_rate) 
 utx   
 (clk, rst, send, dintx, tx, donetx);   
  
-uartrx 
+uartrx // define sub module 
 #(clk_freq, baud_rate)
 rtx
 (clk, rst, rx, donerx, doutrx);    
-    
-    
+      
 endmodule
- 
- 
-//////////////////////////////////////////////////////////////////
+
+////
  
 module uarttx
 #(
@@ -45,19 +43,21 @@ output reg tx,
 output reg donetx
 );
  
-  localparam clkcount = (clk_freq/baud_rate); ///x
+localparam clkcount = (clk_freq/baud_rate); ///  determine the appropriate timing for data transmission and reception in accordance with the specified baud
+rate and clock frequency.
   
-integer count = 0;
-integer counts = 0;
+integer count = 0; // used for counting clock cycles
+integer counts = 0; // used to keep track of the number of bits transmitted or received.
  
-reg uclk = 0;
+reg uclk = 0; // This register is used to represent the UART clock signal
   
-enum bit[1:0] {idle = 2'b00, start = 2'b01, transfer = 2'b10, done = 2'b11} state;
+enum bit[1:0] {idle = 2'b00, start = 2'b01, transfer = 2'b10, done = 2'b11} state; // determined that four distinct states are required to represent the
+different stages of the UART communication process.
  
  ///////////uart_clock_gen
   always@(posedge clk)
     begin
-      if(count < clkcount/2)
+      if(count < clkcount/2) // cklcount / 2 is used to determine the halfway point of the clock cycle (50% DC)
         count <= count + 1;
       else begin
         count <= 0;
@@ -94,8 +94,6 @@ enum bit[1:0] {idle = 2'b00, start = 2'b01, transfer = 2'b10, done = 2'b11} stat
            else
              state <= idle;       
          end
-       
- 
       
       transfer: begin
         if(counts <= 7) begin
