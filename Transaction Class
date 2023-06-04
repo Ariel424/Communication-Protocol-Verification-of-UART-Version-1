@@ -14,7 +14,7 @@ class transaction;
   bit donetx;
   bit donerx;
     
-  function void display (input string tag);
+  function void display (input string tag); // this function dont return value, she just display.
     $display("[%0s] : oper : %0s send : %0b TX_DATA : %b RX_IN : %0b TX_OUT : %0b RX_OUT : %b DONE_TX : %0b DONE_RX : %0b", tag, oper.name(), send, dintx, rx, tx, doutrx, donetx, donerx);    
   endfunction
   
@@ -33,7 +33,7 @@ class transaction;
 endclass
  
 /*
-module tb;
+module tb; // Testbranch to Transaction Class
   transaction tr;
   
   initial begin
