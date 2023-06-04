@@ -1,28 +1,28 @@
 class generator;
   
- transaction tr;
+ transaction tr; // hold the data from transaction class.  
   
-  mailbox #(transaction) mbx;
+  mailbox #(transaction) mbx; // make the exchange of the data easier between components.
   
-  event done;
+  event done; // generate signals between the data.
   
-  int count = 0;
+  int count = 0; // holds the number of transaction to generate.
   
-  event drvnext;
-  event sconext;
+  event drvnext; // Event to synchronize with the driver class 
+  event sconext; // Event to synchronize with the scoreboard class
   
-  function new(mailbox #(transaction) mbx);
+  function new(mailbox #(transaction) mbx); //  responsible for generating transactions and putting them into the mailbox.
     this.mbx = mbx;
     tr = new();
   endfunction
   
   task run();
   
-    repeat(count) begin
+    repeat (count) begin // loop is used to generate transactions count number of times.
       assert(tr.randomize) else $error("[GEN] :Randomization Failed");
-      mbx.put(tr.copy);
+      mbx.put(tr.copy); // The randomized transaction tr is then copied using the copy() function and put into the mailbox using mbx.put()
       tr.display("GEN");
-      @(drvnext);
+      @(drvnext); // Synchronization points are set using the @(drvnext) and @(sconext) statements to coordinate with the driver and scoreboard components.
       @(sconext);
     end
     
@@ -31,5 +31,9 @@ class generator;
   
 endclass
  
+////
+
+the generator class generates random transactions, puts them into a mailbox, and synchronizes with other components using events. 
+
 ////
  
