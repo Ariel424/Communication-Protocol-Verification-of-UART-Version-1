@@ -70,33 +70,28 @@ module tb;
   mailbox #(bit [7:0]) mbxds;
   mailbox #(bit [7:0]) mbxms;
   
-  uart_if vif();
+  uart_if vif(); // interface
   
   uart_top #(1000000, 9600) dut (vif.clk,vif.rst,vif.rx,vif.dintx,vif.send,vif.tx,vif.doutrx,vif.donetx, vif.donerx);
-  
-  
   
     initial begin
       vif.clk <= 0;
     end
     
-    always #10 vif.clk <= ~vif.clk;
+    always #10 vif.clk <= ~vif.clk; // reates a clock signal with a period of 20 time units (10 time units high, 10 time units low).
   
-  
- 
   initial begin
     mbx = new();
     mbxds = new();
     mbxms = new();
-    
-    
+      
     gen = new(mbx);
     drv = new(mbxds,mbx);
     mon= new(mbxms);
     
     gen.count  = 10;
-    drv.vif = vif;
-    mon.vif = vif;
+    drv.vif = vif; // Assigns the inteface to driver class 
+    mon.vif = vif; // Assigns the inteface to monitor class
     
     gen.drvnext = drvnext;
     
