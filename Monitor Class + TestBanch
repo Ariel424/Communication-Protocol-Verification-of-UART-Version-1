@@ -1,15 +1,16 @@
 class monitor; // keep track on the data and analyze the data 
  
-  transaction tr; // getting the data from transaction class
+transaction tr; // getting the data from transaction class
   
-  mailbox #(bit [7:0]) mbx; // mx that responsible on the 
+mailbox #(bit [7:0]) mbx; // the usage of mailbox is to communication between the data we receiving in this class, ensuring that data is sent and received in a coordinated manner,
+avoiding race conditions or data corruption. 
   
-  bit [7:0] srx; //////send
-  bit [7:0] rrx; ///// recv
+bit [7:0] srx; // variable used for sending data
+bit [7:0] rrx; // variable used for receiving data
  
-  virtual uart_if vif;
+  virtual uart_if vif; // virtual interface of the UART
   
-  function new(mailbox #(bit [7:0]) mbx);
+  function new(mailbox #(bit [7:0]) mbx); // using new() function initialize mbx variable through construction to get specific value.
     this.mbx = mbx;
     endfunction
   
@@ -30,18 +31,18 @@ class monitor; // keep track on the data and analyze the data
                     
               end
  
+                  $display("[MON] : DATA SEND on UART TX %0d", srx); // once all 8 bits of data are collected, displays the data 
                   
-                  $display("[MON] : DATA SEND on UART TX %0d", srx);
-                  
-                  //////////wait for done tx before proceeding next transaction                
-                @(posedge vif.uclktx); //
-                mbx.put(srx);
+                  //wait for done tx before proceeding next transaction                
+                @(posedge vif.uclktx); 
+                mbx.put(srx); // The put() function is used to insert data into the mailbox.
+                In this case, it is inserting the value of the srx variable into the mailbox.
                  
                end
       
       else if ((vif.rx == 1'b0) && (vif.send == 1'b0) ) 
         begin
-          wait(vif.donerx == 1);
+          wait(vif.donerx == 1); // This line pauses the execution of the code until the vif.donerx signal becomes 1
            rrx = vif.doutrx;     
            $display("[MON] : DATA RCVD RX %0d", rrx);
            @(posedge vif.uclktx); 
@@ -53,7 +54,7 @@ endtask
  
 endclass
  
-////////////////////////////////////////////////////////
+///////
  
 /*
 module tb;
@@ -61,9 +62,8 @@ module tb;
   driver drv;
   monitor mon;
   
-  event sconext;
+  event sconext; 
   event drvnext;
-  
   event done;
   
   mailbox #(transaction) mbx;
@@ -122,8 +122,7 @@ module tb;
   $dumpfile("dump.vcd");
     $dumpvars;
   end
-  
-  
+    
      
 assign vif.uclktx = dut.utx.uclk;
 assign vif.uclkrx = dut.rtx.uclk;
