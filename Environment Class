@@ -4,33 +4,24 @@ class environment;
     driver drv;
     monitor mon;
     scoreboard sco; 
+
+    event nextgd; // gen -> drv
+    event nextgs; // gen -> sco
   
-    
-  
-    event nextgd; ///gen -> drv
-  
-    event nextgs;  /// gen -> sco
-  
-  mailbox #(transaction) mbxgd; ///gen - drv
-  
+  mailbox #(transaction) mbxgd; /// gen - drv. the usage of transaction eant to pass more complex and structured information between the generator and the driver.
   mailbox #(bit [7:0]) mbxds; /// drv - sco
-    
-     
   mailbox #(bit [7:0]) mbxms;  /// mon - sco
   
-    virtual uart_if vif;
+  virtual uart_if vif; // virtual interface
  
-  
   function new(virtual uart_if vif);
        
-    mbxgd = new();
+    mbxgd = new(); // allocate memory to communication channels between different components. this command make the the infrastructure to communication.
     mbxms = new();
     mbxds = new();
     
     gen = new(mbxgd);
     drv = new(mbxds,mbxgd);
-    
-    
  
     mon = new(mbxms);
     sco = new(mbxds, mbxms);
@@ -70,8 +61,6 @@ class environment;
     test();
     post_test();
   endtask
-  
-  
   
 endclass
  
