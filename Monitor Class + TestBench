@@ -78,7 +78,7 @@ module tb;
       vif.clk <= 0;
     end
     
-    always #10 vif.clk <= ~vif.clk; // reates a clock signal with a period of 20 time units (10 time units high, 10 time units low).
+    always #10 vif.clk <= ~vif.clk; // repeats a clock signal with a period of 20 time units (10 time units high, 10 time units low).
   
   initial begin
     mbx = new();
