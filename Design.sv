@@ -51,7 +51,6 @@ integer counts = 0; // used to keep track of the number of bits transmitted or r
 reg uclk = 0; // This register is used to represent the UART clock signal
   
 enum bit[1:0] {idle = 2'b00, start = 2'b01, transfer = 2'b10, done = 2'b11} state; // determined that four distinct states are required to represent the
-different stages of the UART communication process.
  
   always@(posedge clk)
     begin
