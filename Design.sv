@@ -2,7 +2,7 @@
  
 module uart_top // define the main module
 #(
-parameter clk_freq = 1000000 // define freq
+parameter clk_freq = 1000000, // define freq
 parameter baud_rate = 9600 // define Bandwide
 )
 (
