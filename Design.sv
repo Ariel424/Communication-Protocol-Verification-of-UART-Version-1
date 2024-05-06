@@ -28,8 +28,8 @@ rtx
       
 endmodule
 
-////
- 
+//
+
 module uarttx
 #(
 parameter clk_freq = 1000000,
@@ -43,8 +43,7 @@ output reg tx,
 output reg donetx
 );
  
-localparam clkcount = (clk_freq/baud_rate); ///  determine the appropriate timing for data transmission and reception in accordance with the specified baud
-rate and clock frequency.
+localparam clkcount = (clk_freq/baud_rate); 
   
 integer count = 0; // used for counting clock cycles
 integer counts = 0; // used to keep track of the number of bits transmitted or received.
@@ -54,7 +53,6 @@ reg uclk = 0; // This register is used to represent the UART clock signal
 enum bit[1:0] {idle = 2'b00, start = 2'b01, transfer = 2'b10, done = 2'b11} state; // determined that four distinct states are required to represent the
 different stages of the UART communication process.
  
- ///////////uart_clock_gen
   always@(posedge clk)
     begin
       if(count < clkcount/2) // cklcount / 2 is used to determine the halfway point of the clock cycle (50% DC)
@@ -64,11 +62,8 @@ different stages of the UART communication process.
         uclk <= ~uclk;
       end 
     end
-  
-  
+   
   reg [7:0] din;
-  ////////////////////Reset decoder
-  
   
   always@(posedge uclk)
     begin
@@ -110,26 +105,18 @@ different stages of the UART communication process.
         end
       end
       
- 
-      
-     
-      default : state <= idle;
+      default: state <= idle;
     endcase
   end
 end
  
 endmodule
- 
- 
- 
-////////////////////////////////////////////////////////////////////
- 
- 
- 
+
+//
  
 module uartrx
 #(
-parameter clk_freq = 1000000, //MHz
+parameter clk_freq = 1000000, 
 parameter baud_rate = 9600
     )
  (
@@ -147,10 +134,8 @@ integer counts = 0;
   
 reg uclk = 0;
   
-  
 enum bit[1:0] {idle = 2'b00, start = 2'b01} state;
  
- ///////////uart_clock_gen
   always@(posedge clk)
     begin
       if(count < clkcount/2)
@@ -160,8 +145,6 @@ enum bit[1:0] {idle = 2'b00, start = 2'b01} state;
         uclk <= ~uclk;
       end 
     end
-  
-  
  
   always@(posedge uclk)
     begin
@@ -175,7 +158,7 @@ enum bit[1:0] {idle = 2'b00, start = 2'b01} state;
      begin
      case(state)
        
-     idle : 
+     idle: 
      begin
      rxdata <= 8'h00;
      counts <= 0;
@@ -200,21 +183,17 @@ enum bit[1:0] {idle = 2'b00, start = 2'b01} state;
      done <= 1'b1;
      state <= idle;
      end
-     end
-   
-   
-   default : state <= idle;
-   
+     end 
+   default: state <= idle;
    endcase
  
 end
- 
 end
  
 endmodule
  
-///////////////////////////////////////////////////////////////////
- 
+//
+
 interface uart_if;
   logic clk;
   logic uclktx;
